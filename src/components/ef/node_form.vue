@@ -82,7 +82,13 @@
                         <el-input v-model="line.label"></el-input>
                     </el-form-item>
                   <el-form-item label="选项编号">
-                    <el-input v-model="line.choose" placeholder="选择分支才填写，对应1-5"></el-input>
+                    <el-select v-model="line.choose" clearable placeholder="选择分支才需要填写">
+                      <el-option value="c1" label="选项1"></el-option>
+                      <el-option value="c2" label="选项2"></el-option>
+                      <el-option value="c3" label="选项3"></el-option>
+                      <el-option value="c4" label="选项4"></el-option>
+                      <el-option value="c5" label="选项5"></el-option>
+                    </el-select>
                   </el-form-item>
                     <el-form-item>
                       <el-button icon="el-icon-close" type="danger" @click="deleteLine">删除</el-button>

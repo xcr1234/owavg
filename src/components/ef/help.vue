@@ -24,12 +24,12 @@
             </el-tab-pane>
           <el-tab-pane label="如何同时编辑多个项目">
             <el-divider content-position="left">如何同时编辑多个项目</el-divider>
-            <div><el-link type="primary" :href="url" target="_blank">打开多个页面窗口</el-link></div>
+            <div>打开多个页面窗口即可</div>
           </el-tab-pane>
-          <el-tab-pane label="如何查看项目源码">
-            <el-divider content-position="left">如何查看项目源码</el-divider>
+          <el-tab-pane label="项目源码">
+            <el-divider content-position="left">项目源码</el-divider>
             <div>
-              <p><el-link type="primary" href="https://github.com/xcr1234/owavg.git" target="_blank">https://github.com/xcr1234/owavg.git</el-link></p>
+              <p v-for="url of $config.gitUrl" :key="url"><el-link type="primary" :href="url" target="_blank">{{url}}</el-link></p>
               <p>有问题请在这里面反馈，不要在其他地方反馈</p>
             </div>
           </el-tab-pane>
@@ -45,8 +45,7 @@
     export default {
         data() {
             return {
-                dialogVisible: false,
-              url: process.env.BASE_URL
+                dialogVisible: false
             }
         },
         components: {},

@@ -87,6 +87,18 @@
         <span slot="footer" class="dialog-footer">
       </span>
       </el-dialog>
+      <el-dialog title="创建项目" :visible.sync="createModal" width="30%" :close-on-click-modal="false" :close-on-press-escape="false">
+        <el-form>
+          <el-form-item label="项目名称">
+            <el-input v-model.trim="createProjectData"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="createModal = false">取消</el-button>
+          <el-button @click="doCrateProject" type="primary">确定</el-button>
+
+        </div>
+      </el-dialog>
     </div>
 
 </template>
@@ -121,6 +133,8 @@
             return {
                projectName: '',
               modal: true,
+              createModal: false,
+              createProjectData: this.$config.defaultProjectName,
                 // jsPlumb 实例
                 jsPlumb: null,
                 // 控制画布销毁
@@ -214,7 +228,8 @@
                         this.$refs.nodeForm.lineInit({
                             from: conn.sourceId,
                             to: conn.targetId,
-                            label: conn.getLabel()
+                            label: conn.getLabel(),
+                          choose:this.data.lineList.filter(l => l.from ===  conn.sourceId && l.to === conn.targetId)[0].choose
                         })
                     })
                     // 连线
@@ -571,7 +586,7 @@
                   const blob = new Blob([
                     JSON.stringify({
                       data: this.data,
-                      version: 100,
+                      version: this.$config.dataFileVersion,
                       project: 'designer',
                       projectName: this.projectName
                     }, null, '\t')
@@ -621,11 +636,20 @@
           },
 
           createProject(){
-            const i = prompt('请输入项目名称','项目1')
-            if(i){
-              this.projectName = i
-              this.modal = false
-            }
+
+            this.createProjectData = this.$config.defaultProjectName
+            this.createModal = true
+          },
+          doCrateProject(){
+              if(!this.createProjectData.length){
+                this.$message.error('输入有误！')
+                return
+              }
+              this.createModal = false
+              this.$nextTick(() => {
+                this.projectName = this.createProjectData
+                this.modal = false
+              })
           },
           handleCommand(cmd){
               if(cmd === 'save') {
@@ -640,6 +664,7 @@
                   closeOnClickModal: false
                 }).then(() => {
                   this.dataReload(getData())
+                  this.createModal = true
                 })
               }
           },
