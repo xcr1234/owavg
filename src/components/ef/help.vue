@@ -29,7 +29,7 @@
           <el-tab-pane label="如何查看项目源码">
             <el-divider content-position="left">如何查看项目源码</el-divider>
             <div>
-              <p><el-link type="primary" href="https://gitee.com/ironV/owavg-tool" target="_blank">https://gitee.com/ironV/owavg-tool</el-link></p>
+              <p><el-link type="primary" href="https://github.com/xcr1234/owavg.git" target="_blank">https://github.com/xcr1234/owavg.git</el-link></p>
               <p>有问题请在这里面反馈，不要在其他地方反馈</p>
             </div>
           </el-tab-pane>
