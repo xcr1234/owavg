@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
+import config from "@/config";
 
-export default () => {
+
+export const getData =  () => {
   const idA = uuidv4()
   const idB = uuidv4()
   return {
@@ -22,7 +24,8 @@ export default () => {
         left: '351px',
         top: '96px',
         ico: 'el-icon-user',
-        message: '这是一段对话'
+        message: '这是一段对话',
+        hero: config.defaultHero
       }
     ],
     lineList:[
@@ -33,3 +36,4 @@ export default () => {
     ]
   }
 }
+

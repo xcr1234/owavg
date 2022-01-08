@@ -15,14 +15,22 @@
                     <el-form-item label="名称">
                         <el-input v-model="node.name"></el-input>
                     </el-form-item>
-                  <el-form-item label="对话内容" v-if="node.type === 'message' || node.type === 'choose'">
-                    <el-input
-                              type="textarea"
-                              :rows="4"
-                              placeholder="请输入对话内容"
-                              v-model.trim="node.message">
-                    </el-input>
-                  </el-form-item>
+                  <template v-if="node.type === 'message' || node.type === 'choose'">
+                    <el-form-item label="对话英雄">
+                      <el-select v-model="node.hero">
+                        <el-option :value="$config.defaultHero" :label="$config.defaultHero"></el-option>
+                        <el-option v-for="hero in $config.allHeroes" :key="hero" :value="'英雄(' + hero + ')'" :label="hero"></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="对话内容" >
+                      <el-input
+                        type="textarea"
+                        :rows="4"
+                        placeholder="请输入对话内容"
+                        v-model.trim="node.message">
+                      </el-input>
+                    </el-form-item>
+                  </template>
                   <template  v-if="node.type === 'choose'">
                     <el-form-item label="选项1">
                       <el-input
@@ -160,6 +168,7 @@
                         node.top = this.node.top
                         node.ico = this.node.ico
                         node.state = this.node.state
+                        node.hero = this.node.hero
                         node.message = this.node.message
                         node.choose1 = this.node.choose1
                       node.choose2 = this.node.choose2

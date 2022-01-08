@@ -34,6 +34,7 @@
                         <el-button type="primary" plain round @click="dataReloadC" icon="el-icon-refresh" size="mini">切换流程C</el-button>
                         <el-button type="primary" plain round @click="dataReloadD" icon="el-icon-refresh" size="mini">自定义样式</el-button>
                         <el-button type="primary" plain round @click="dataReloadE" icon="el-icon-refresh" size="mini">力导图</el-button>-->
+                      <el-button type="primary" plain round icon="el-icon-document-checked" @click="downloadData">保存项目</el-button>
                       <el-button type="primary" plain round icon="el-icon-check" @click="exportCode">导出代码</el-button>
                       <el-button type="info" plain round icon="el-icon-document" @click="openHelp" size="mini">帮助</el-button>
                     </div>
@@ -99,6 +100,24 @@
 
         </div>
       </el-dialog>
+      <el-dialog title="生成代码" :visible.sync="codeModal" width="50%">
+        <el-tabs v-model="codeTab">
+          <el-tab-pane label="生成的代码" name="code">
+            <pre class="code-pre">{{code}}</pre>
+          </el-tab-pane>
+          <el-tab-pane label="触发的代码" name="trigger">
+            <pre class="code-pre">{{triggerCode}}</pre>
+          </el-tab-pane>
+          <el-tab-pane label="全局代码" name="all">
+            <pre class="code-pre">{{modcode}}</pre>
+          </el-tab-pane>
+        </el-tabs>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="text" @click="copyCode">复制到剪贴板</el-button>
+          <el-button @click="codeHelp">帮助</el-button>
+          <el-button @click="codeModal = false" type="primary">关闭</el-button>
+        </div>
+      </el-dialog>
     </div>
 
 </template>
@@ -122,15 +141,21 @@
     import { getDataE } from './data_E'
     import { ForceDirected } from './force-directed'
     import { v4 as uuidv4 } from 'uuid';
-    import getData from './data'
+    import {getData} from './data'
     import { saveAs } from 'file-saver';
-
+    import gencode from "@/mod/gencode";
+    import modcode from "@/mod/modcode";
 
 
 
     export default {
         data() {
             return {
+              triggerCode: '',
+              code: '',
+              modcode:modcode,
+              codeModal: false,
+              codeTab: 'code',
                projectName: '',
               modal: true,
               createModal: false,
@@ -432,7 +457,8 @@
                     left: left + 'px',
                     top: top + 'px',
                     ico: nodeMenu.ico,
-                    state: 'success'
+                    state: 'success',
+                    hero: this.$config.defaultHero
                 }
                 /**
                  * 这里可以进行业务判断、是否能够添加该节点
@@ -627,6 +653,11 @@
               if(data.project !== 'designer'){
                 throw new Error('数据格式有误')
               }
+              if(data.version === 100){
+                data.data.nodeList.forEach(node => {
+                  node.hero = this.$config.defaultHero
+                })
+              }
 
               this.dataReload(data.data)
               this.projectName = data.projectName
@@ -669,7 +700,41 @@
               }
           },
           exportCode(){
-              alert('开发中')
+              try{
+                const result =   gencode(this.data)
+                this.code = result[0]
+                this.triggerCode = result[1]
+              }catch (e){
+                console.error(e)
+                this.$message.error('生成代码出错：' + e.message)
+                return
+              }
+              this.codeTab = 'code'
+              this.codeModal = true
+          },
+          copyCode(){
+              let toCopy = ''
+              if(this.codeTab === 'all'){
+                toCopy = this.modcode
+              }else if(this.codeTab === 'code'){
+                toCopy = this.code
+              }else if(this.codeTab === 'trigger'){
+                toCopy = this.triggerCode
+              }
+            this.$copyText(toCopy).then(() => {
+              this.$message.success('已经复制')
+            }).catch(() => {
+              this.$message.error('复制失败！')
+            })
+          },
+          codeHelp(){
+            this.$alert(`<ul>
+              <li>生成的代码 - 复制到OW中</li>
+              <li>触发代码 - 一个动作，用于触发这个项目 需添加到某个事件中</li>
+              <li>全局代码 - 复制到OW中，只需要添加一次！</li>
+            </ul>`, '提示', {
+              dangerouslyUseHTMLString: true
+            });
           }
         },
     }

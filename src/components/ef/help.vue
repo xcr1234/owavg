@@ -26,6 +26,15 @@
             <el-divider content-position="left">如何同时编辑多个项目</el-divider>
             <div>打开多个页面窗口即可</div>
           </el-tab-pane>
+          <el-tab-pane label="如何使用导出代码">
+            <el-divider content-position="left">如何使用导出代码</el-divider>
+            <div>点右上角的导出代码</div>
+            <ul>
+              <li>生成的代码 - 复制到OW中</li>
+              <li>触发代码 - 一个动作，用于触发这个项目 需添加到某个事件中</li>
+              <li>全局代码 - 复制到OW中，只需要添加一次！</li>
+            </ul>
+          </el-tab-pane>
           <el-tab-pane label="项目源码">
             <el-divider content-position="left">项目源码</el-divider>
             <div>
