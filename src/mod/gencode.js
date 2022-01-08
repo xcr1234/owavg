@@ -43,14 +43,14 @@ const selectView = (chooseArray) => {
     return `自定义字符串("{0}${chooseArray[0]}\\r\\n{1}${chooseArray[1]}\\r\\n",${view(0)},${view(1)})`
   }
   if(chooseArray.length === 3){
-    return `自定义字符串("{0}${chooseArray[0]}\\r\\n{1}${chooseArray[1]}\\r\\n{2}",,${view(0)},${view(1)},自定义字符串("{0}${chooseArray[2]}\\r\\n",${view(2)}))`
+    return `自定义字符串("{0}${chooseArray[0]}\\r\\n{1}${chooseArray[1]}\\r\\n{2}",${view(0)},${view(1)},自定义字符串("{0}${chooseArray[2]}\\r\\n",${view(2)}))`
   }
   if(chooseArray.length === 4){
-    return `自定义字符串("{0}${chooseArray[0]}\\r\\n{1}${chooseArray[1]}\\r\\n{2}",,${view(0)},${view(1)},`+
+    return `自定义字符串("{0}${chooseArray[0]}\\r\\n{1}${chooseArray[1]}\\r\\n{2}",${view(0)},${view(1)},`+
       `自定义字符串("{0}${chooseArray[2]}\\r\\n{1}${chooseArray[3]}\\r\\n",${view(2)},${view(3)}))`
   }
   if(chooseArray.length === 5){
-    return `自定义字符串("{0}${chooseArray[0]}\\r\\n{1}${chooseArray[1]}\\r\\n{2}",,${view(0)},${view(1)},`+
+    return `自定义字符串("{0}${chooseArray[0]}\\r\\n{1}${chooseArray[1]}\\r\\n{2}",${view(0)},${view(1)},`+
       `自定义字符串("{0}${chooseArray[2]}\\r\\n{1}${chooseArray[3]}\\r\\n{2}${chooseArray[4]}\\r\\n",${view(2)},${view(3)},${view(4)}))`
   }
 }

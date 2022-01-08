@@ -100,7 +100,7 @@
 
         </div>
       </el-dialog>
-      <el-dialog title="生成代码" :visible.sync="codeModal" width="50%">
+      <el-dialog title="生成代码" :visible.sync="codeModal" width="50%" :close-on-click-modal="false" :close-on-press-escape="false">
         <el-tabs v-model="codeTab">
           <el-tab-pane label="生成的代码" name="code">
             <pre class="code-pre">{{code}}</pre>

@@ -130,8 +130,8 @@ export default `设置
 		事件玩家.length = 0;
 		事件玩家.text = 自定义字符串("");
 		If(字符串长度(事件玩家.next_route) > 0);
-			事件玩家.next_route = 自定义字符串("");
 			事件玩家.route = 事件玩家.next_route;
+			事件玩家.next_route = 自定义字符串("");
 		End;
 	}
 }
