@@ -27,10 +27,18 @@
                         type="textarea"
                         :rows="4"
                         placeholder="请输入对话内容"
-                        v-model.trim="node.message">
+                        v-model="node.message">
                       </el-input>
                     </el-form-item>
                   </template>
+                  <el-form-item label="代码内容" v-if="node.type === 'code'">
+                    <el-input v-model="node.code" placeholder="粘贴OW代码，在导出代码时会原样输出"
+                              type="textarea"
+                              :rows="4"></el-input>
+                  </el-form-item>
+                  <el-form-item label="条件" v-if="node.type === 'ow-if'">
+                    <el-input v-model="node.code" placeholder="粘贴OW代码 if条件"></el-input>
+                  </el-form-item>
                   <template  v-if="node.type === 'choose'">
                     <el-form-item label="选项1">
                       <el-input
@@ -89,7 +97,7 @@
                     <el-form-item label="标签">
                         <el-input v-model="line.label"></el-input>
                     </el-form-item>
-                  <el-form-item label="选项编号">
+                  <el-form-item label="选项编号" v-if="line.nodeType === 'choose'">
                     <el-select v-model="line.choose" clearable placeholder="选择分支才需要填写">
                       <el-option value="c1" label="选项1"></el-option>
                       <el-option value="c2" label="选项2"></el-option>
@@ -169,12 +177,13 @@
                         node.ico = this.node.ico
                         node.state = this.node.state
                         node.hero = this.node.hero
-                        node.message = this.node.message
+                        node.message = this.node.message ? this.node.message.trim() : this.node.message
                         node.choose1 = this.node.choose1
                       node.choose2 = this.node.choose2
                       node.choose3 = this.node.choose3
                       node.choose4 = this.node.choose4
                       node.choose5 = this.node.choose5
+                      node.code = this.node.code
                         this.$emit('repaintEverything')
                     }
                 })

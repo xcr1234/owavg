@@ -1,3 +1,5 @@
+import lodash from 'lodash'
+
 const mapChars = (arr) => {
   const result = []
   for(let c of arr){
@@ -158,6 +160,32 @@ ${selectRoutes(node,chooseLines)}
 `
 }
 
+const messageCode = (node,next) => {
+  if(!node.code || !node.code.length){
+    throw new Error(`请填写[${node.name}]的对话内容`)
+  }
+  return `规则("${node.name}")
+{
+\t事件
+\t{
+\t\t持续 - 每名玩家;
+\t\t双方;
+\t\t全部;
+\t}
+
+\t条件
+\t{
+\t\t事件玩家.route == 自定义字符串("${node.id}");
+\t}
+
+\t动作
+\t{
+${node.code}
+${next || ''}
+\t}
+}`
+}
+
 const getToLines = (lineList,nodeId) => {
   return lineList.filter(line => line.from === nodeId)
 }
@@ -200,6 +228,73 @@ const getNodeCode = (node,ctx) => {
       const toNode = ctx.nodeMap[line.to]
       getNodeCode(toNode,ctx)
     }
+  }else if(node.type === 'code'){
+    const lines = getToLines(ctx.lineList,node.id)
+    if(lines.length === 0){
+      ctx.buf = ctx.buf + messageCode(node,null)
+      return
+    }
+    let owIf = []
+    let other = []
+    for(let line of lines){
+      const node = ctx.nodeMap[line.to]
+      if(node.type === 'ow-if'){
+        owIf.push(node)
+      }else{
+        other.push(node)
+      }
+    }
+    if(owIf.length > 0 && other.length > 0){
+      throw new Error(`节点[${node.name}]后面根了OW条件 不能再跟其他类型的节点了`)
+    }
+    if(owIf.length === 1){
+      throw new Error(`节点[${node.name}]后面OW条件至少一个`)
+    }
+    if(other.length > 1){
+      throw new Error(`节点[${node.name}]后面只能有一个常规节点`)
+    }
+    if(other.length === 1){
+      ctx.buf = ctx.buf + messageCode(node,`事件玩家.route = 自定义字符串("${other[0].id}");`)
+      getNodeCode(other[0],ctx)
+    }else{
+      //合并OW条件节点
+      messageOwIf(ctx,node,owIf)
+    }
+  }
+}
+
+const messageOwIf = (ctx,node,owIf) => {
+  let tmp = ''
+  const targets = []
+  for(let i=0;i<owIf.length;i++){
+    const oif = owIf[i]
+    const lines = getToLines(ctx.lineList,oif.id)
+    if(lines.length !== 1){
+      throw new Error(`OW条件[${oif.name}]后面必须跟一个节点`)
+    }
+    if(!oif.code || !oif.code.length){
+      throw new Error(`请填写[${oif.name}]的条件内容`)
+    }
+    const target = ctx.nodeMap[lines[0].to]
+    targets.push(target)
+    if(oif.code === 'else'){
+      tmp += `Else;
+事件玩家.route = 自定义字符串("${target.id}");
+`
+    }else{
+      if(i > 0){
+        tmp += 'Else '
+      }
+      tmp += `If(${oif.code});
+事件玩家.route = 自定义字符串("${target.id}");
+`
+    }
+
+  }
+  tmp += 'End;'
+  ctx.buf = ctx.buf + messageCode(node,tmp)
+  for(let target of targets){
+    getNodeCode(target,ctx)
   }
 }
 

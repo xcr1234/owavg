@@ -59,7 +59,19 @@
                                 ico: 'el-icon-question',
                                 // 自定义覆盖样式
                                 style: {}
-                            },
+                            },{
+                            id: '13',
+                            type: 'code',
+                            name: 'OW代码',
+                            ico: 'el-icon-more',
+                            // 自定义覆盖样式
+                            style: {}
+                          },{
+                            id: '14',
+                            type: 'ow-if',
+                            name: 'OW条件',
+                            ico: 'el-icon-more',
+                          }
                         ]
                     }
                 ],

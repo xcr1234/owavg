@@ -254,7 +254,8 @@
                             from: conn.sourceId,
                             to: conn.targetId,
                             label: conn.getLabel(),
-                          choose:this.data.lineList.filter(l => l.from ===  conn.sourceId && l.to === conn.targetId)[0].choose
+                          choose:this.data.lineList.filter(l => l.from ===  conn.sourceId && l.to === conn.targetId)[0].choose,
+                          nodeType:this.data.nodeList.filter(node => node.id === conn.sourceId)[0].type
                         })
                     })
                     // 连线
