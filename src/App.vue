@@ -9,10 +9,15 @@
 export default {
   name: 'App',
   mounted() {
-    const script = document.createElement('script')
-    script.src = 'https://s95.cnzz.com/z_stat.php?id=1280767745&web_id=1280767745'
-    script.language = 'JavaScript'
-    document.body.appendChild(script)
+    if(process.env.NODE_ENV === 'production'){
+
+      const script = document.createElement('script')
+      script.src = 'https://s95.cnzz.com/z_stat.php?id=1280767745&web_id=1280767745'
+      script.language = 'JavaScript'
+      document.body.appendChild(script)
+    }
+
+
   },
   watch: {
     '$route': {

@@ -15,9 +15,20 @@
                     <el-form-item label="名称">
                         <el-input v-model="node.name"></el-input>
                     </el-form-item>
+                  <el-form-item label="压缩字符串">
+                    <el-switch
+                      v-model="node.disableCompress" :active-value="false" :inactive-value="true"
+                      active-color="#13ce66"
+                      inactive-color="#ff4949" ></el-switch>
+                  </el-form-item>
                   <template v-if="node.type === 'message' || node.type === 'choose'">
                     <el-form-item label="对话英雄">
-                      <el-select v-model="node.hero">
+                      <el-select v-model="node.hero"    filterable @change="heroChange"
+                                 allow-create
+                                 default-first-option>
+                        <template v-if="data.externHeroes">
+                          <el-option v-for="hero in data.externHeroes" :key="hero" :value="hero" :label="hero"></el-option>
+                        </template>
                         <el-option :value="$config.defaultHero" :label="$config.defaultHero"></el-option>
                         <el-option v-for="hero in $config.allHeroes" :key="hero" :value="'英雄(' + hero + ')'" :label="hero"></el-option>
                       </el-select>
@@ -146,6 +157,9 @@
             }
         },
         methods: {
+            heroChange(val){
+              this.$emit('heroChange',val)
+            },
             /**
              * 表单修改，这里可以根据传入的ID进行业务信息获取
              * @param data
@@ -184,6 +198,7 @@
                       node.choose4 = this.node.choose4
                       node.choose5 = this.node.choose5
                       node.code = this.node.code
+                      node.disableCompress = this.node.disableCompress
                         this.$emit('repaintEverything')
                     }
                 })

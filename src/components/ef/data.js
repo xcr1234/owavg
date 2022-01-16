@@ -15,7 +15,8 @@ export const getData =  () => {
         left: '18px',
         top: '223px',
         ico: 'el-icon-house',
-        state: 'success'
+        state: 'success',
+        disableCompress: false
       },
       {
         id: idB,
@@ -25,7 +26,8 @@ export const getData =  () => {
         top: '96px',
         ico: 'el-icon-user',
         message: '这是一段对话',
-        hero: config.defaultHero
+        hero: config.defaultHero,
+        disableCompress: false
       }
     ],
     lineList:[
@@ -33,7 +35,8 @@ export const getData =  () => {
         from: idA,
         to: idB
       }
-    ]
+    ],
+    externHeroes: []
   }
 }
 

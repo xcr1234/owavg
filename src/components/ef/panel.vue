@@ -64,6 +64,7 @@
             <!-- 右侧表单 -->
             <div style="width: 300px;border-left: 1px solid #dce3e8;background-color: #FBFBFB">
                 <flow-node-form ref="nodeForm" @setLineLabel="setLineLabel"
+                                @heroChange="heroChange"
                                 @deleteNode="deleteNode" @deleteLine="onDeleteLine"
                                 @repaintEverything="repaintEverything"></flow-node-form>
             </div>
@@ -77,12 +78,15 @@
         width="30%">
         <el-form>
           <el-form-item>
-            <el-button type="text" @click="createProject" style="font-size: 18px">创建项目</el-button>
+            <el-button type="text" @click="createProject" style="font-size: 18px;color:#409EFF">创建项目</el-button>
           </el-form-item>
           <el-form-item>
             <el-upload action="" :auto-upload="false" :show-file-list="false" :on-change="fileChange" accept=".json" style="display: inline-block">
-              <el-button type="text" style="font-size: 18px">打开项目</el-button>
+              <el-button type="text" style="font-size: 18px;color:#6cf">打开项目</el-button>
             </el-upload>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="text" @click="openHelp" style="font-size: 18px;color:#909399">帮助</el-button>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -231,6 +235,12 @@
             this.$nextTick(() => {
                 this.dataReload(getData())
             })
+          window.onbeforeunload=(e) => {
+            if(!this.modal){
+              var e = window.event||e;
+              e.returnValue=("确定离开当前页面吗？");
+            }
+          }
         },
         methods: {
             // 返回唯一标识
@@ -619,7 +629,7 @@
                     }, null, '\t')
                   ], {type: "text/plain;charset=utf-8"});
 
-                  saveAs(blob, "data.json");
+                  saveAs(blob, this.projectName +  ".json");
 
                 }).catch(() => {
                 })
@@ -649,6 +659,11 @@
               }
             }
           },
+          heroChange(val){
+              if(this.$config.allHeroes.indexOf(val) === -1 && this.data.externHeroes.indexOf(val) === -1){
+                this.data.externHeroes.push(val)
+              }
+          },
           loadFileData(fileString){
               const data = JSON.parse(fileString)
               if(data.project !== 'designer'){
@@ -658,6 +673,9 @@
                 data.data.nodeList.forEach(node => {
                   node.hero = this.$config.defaultHero
                 })
+              }
+              if(data.version < 103){
+                data.data.externHeroes = []
               }
 
               this.dataReload(data.data)

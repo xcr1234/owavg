@@ -1,8 +1,11 @@
 import lodash from 'lodash'
 
-const mapChars = (arr) => {
+const mapChars = (message,node) => {
+  if(node.disableCompress){
+    return `自定义字符串("${message}")`
+  }
   const result = []
-  for(let c of arr){
+  for(let c of message){
     result.push(`自定义字符串("${c}")`)
   }
   return result
@@ -28,7 +31,7 @@ const messageNode = (node,toNodeId) => {
 
 \t动作
 \t{
-\t\t事件玩家.text_input = 数组(${mapChars(node.message)});
+\t\t事件玩家.text_input = 数组(${mapChars(node.message,node)});
 \t\t事件玩家.next_route = 自定义字符串("${toNodeId}");
 \t\t事件玩家.text_hero = ${node.hero};
 \t\t事件玩家.playing = 真;
@@ -127,7 +130,7 @@ const messageChoose = (node,chooseArray,chooseLines) => {
 
 \t动作
 \t{
-\t\t事件玩家.text_input = 数组(${mapChars(node.message)});
+\t\t事件玩家.text_input = 数组(${mapChars(node.message,node)});
 \t\t事件玩家.text_hero = ${node.hero};
 \t\t事件玩家.is_select = 真;
 \t\t事件玩家.select_number = ${chooseArray.length};
