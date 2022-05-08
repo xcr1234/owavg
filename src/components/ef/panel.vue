@@ -626,7 +626,9 @@
                       version: this.$config.dataFileVersion,
                       project: 'designer',
                       projectName: this.projectName
-                    }, null, '\t')
+                    },
+                      // null, '\t'
+                    )
                   ], {type: "text/plain;charset=utf-8"});
 
                   saveAs(blob, this.projectName +  ".json");
@@ -721,8 +723,8 @@
           exportCode(){
               try{
                 const result =   gencode(this.data)
-                this.code = result[0]
-                this.triggerCode = result[1]
+                this.code = result.code
+                this.triggerCode = result.trigger
               }catch (e){
                 console.error(e)
                 this.$message.error('生成代码出错：' + e.message)

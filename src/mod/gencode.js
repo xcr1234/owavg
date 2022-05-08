@@ -211,10 +211,10 @@ const getNodeCode = (node,ctx) => {
       throw new Error(`[${node.name}]后面只能连接一个节点`)
     }else if(lines.length === 1){
       const toNode = ctx.nodeMap[lines[0].to]
-      ctx.buf =  ctx.buf + messageNode(node,toNode.id)
+      ctx.append(messageNode(node,toNode.id))
       getNodeCode(toNode,ctx)
     }else{
-      ctx.buf =  ctx.buf + messageNode(node,'')
+      ctx.append(messageNode(node,''))
     }
   }else if(node.type === 'choose'){
     const lines = getToLines(ctx.lineList,node.id)
@@ -225,7 +225,7 @@ const getNodeCode = (node,ctx) => {
     if(choose.length !== lines.length){
       throw new Error(`[${node.name}]选项数量和连线数量不一致`)
     }
-    ctx.buf =  ctx.buf + messageChoose(node,choose,lines)
+    ctx.append(messageChoose(node,choose,lines))
     for(let i= 0;i<lines.length;i++){
       const line = lines[i]
       const toNode = ctx.nodeMap[line.to]
@@ -234,7 +234,7 @@ const getNodeCode = (node,ctx) => {
   }else if(node.type === 'code'){
     const lines = getToLines(ctx.lineList,node.id)
     if(lines.length === 0){
-      ctx.buf = ctx.buf + messageCode(node,null)
+      ctx.append(messageCode(node,null))
       return
     }
     let owIf = []
@@ -257,7 +257,7 @@ const getNodeCode = (node,ctx) => {
       throw new Error(`节点[${node.name}]后面只能有一个常规节点`)
     }
     if(other.length === 1){
-      ctx.buf = ctx.buf + messageCode(node,`事件玩家.route = 自定义字符串("${other[0].id}");`)
+      ctx.append (messageCode(node,`事件玩家.route = 自定义字符串("${other[0].id}");`))
       getNodeCode(other[0],ctx)
     }else{
       //合并OW条件节点
@@ -295,7 +295,7 @@ const messageOwIf = (ctx,node,owIf) => {
 
   }
   tmp += 'End;'
-  ctx.buf = ctx.buf + messageCode(node,tmp)
+  ctx.append(messageCode(node,tmp))
   for(let target of targets){
     getNodeCode(target,ctx)
   }
@@ -309,7 +309,29 @@ const triggerCode = (node) => {
 `
 }
 
-export default   (data) => {
+export const poolId = (data) => {
+  const pool = {}
+  data.nodeList.forEach(node => {
+    let pos = 6
+    let id = ''
+    do{
+      id = node.id.substring(0,pos);
+      pos+=4;
+    }while (pool[id])
+    pool[id] = node.id
+    pool[node.id] = id
+    node.id = id
+  })
+  data.lineList.forEach(line => {
+    line.from = pool[line.from]
+    line.to = pool[line.to]
+  })
+}
+
+export default   (i) => {
+  const data = lodash.cloneDeep(i)
+  poolId(data)
+
   const nodeMap = {}
   data.nodeList.forEach(node => {
     nodeMap[node.id] = node
@@ -328,11 +350,15 @@ export default   (data) => {
     nodeMap,
     nodeList:data.nodeList,
     lineList:data.lineList,
-    buf: ''
+    buf: '',
+    append(str){
+      this.buf += str
+    }
   }
   const node = nodeMap[lines[0].to]
   getNodeCode(node,ctx)
-  return [
-    ctx.buf, triggerCode(node)
-  ]
+  return {
+    code: ctx.buf,
+    trigger: triggerCode(node)
+  }
 }
