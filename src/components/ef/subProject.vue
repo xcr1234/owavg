@@ -69,7 +69,7 @@ export default {
     editSubProject(row,index){
       this.$emit('editSub',{
         data:row.data,
-        index
+        key:row.key
       })
       this.dialog = false
     }

@@ -65,7 +65,7 @@
             </div>
             <!-- 右侧表单 -->
             <div style="width: 300px;border-left: 1px solid #dce3e8;background-color: #FBFBFB">
-                <flow-node-form ref="nodeForm" :sub="!parentData" @setLineLabel="setLineLabel" @openSub="$refs.sub.open()"
+                <flow-node-form ref="nodeForm" :sub="!parentData" :child-projects="childProjects" @setLineLabel="setLineLabel" @openSub="$refs.sub.open()"
                                 @heroChange="heroChange"
                                 @deleteNode="deleteNode" @deleteLine="onDeleteLine"
                                 @repaintEverything="repaintEverything"></flow-node-form>
@@ -157,6 +157,15 @@
 
 
     export default {
+        computed:{
+          childProjects(){
+            if(this.parentData){
+              const {data,key} = this.parentData
+              return data.childProjects.filter(item => item.key !== key)
+            }
+            return this.data.childProjects
+          }
+        },
         data() {
             return {
               triggerCode: '',
@@ -751,7 +760,7 @@
           },
           exportCode(){
               let data = this.data
-              if(this.parentData){
+              if(this.parentData && confirm('当前是在子项目中，是否生成整个项目的代码？')){
                 this.ensureParent()
                 data = lodash.cloneDeep(this.parentData.data)
               }
@@ -792,10 +801,10 @@
             });
           },
           editSub(obj){
-              const {data,index} = obj;
+              const {data,key} = obj;
               this.parentData = {
                 data: lodash.cloneDeep(this.data),
-                index: index
+                key
               }
               this.dataReload(data)
           },
@@ -806,7 +815,7 @@
           },
           ensureParent(){
               if(this.parentData){
-                this.parentData.data.childProjects[this.parentData.index].data = lodash.cloneDeep(this.data)
+                this.parentData.data.childProjects.filter(item => item.key === this.parentData.key)[0].data = lodash.cloneDeep(this.data)
               }
           }
         },

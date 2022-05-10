@@ -17,7 +17,7 @@
                     </el-form-item>
                   <el-form-item label="子项目">
                     <el-select v-model="node.message">
-                      <el-option v-for="(item) in data.childProjects" :key="item.key" :value="item.key" :label="item.projectName"></el-option>
+                      <el-option v-for="(item) in childProjects" :key="item.key" :value="item.key" :label="item.projectName"></el-option>
                     </el-select>
                     <el-button v-if="sub" type="text" @click="$emit('openSub')">管理子项目</el-button>
                   </el-form-item>
@@ -140,7 +140,8 @@
 
     export default {
         props:{
-          sub: Boolean
+          sub: Boolean,
+          childProjects: []
         },
         data() {
             return {
