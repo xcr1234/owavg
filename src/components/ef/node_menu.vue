@@ -71,6 +71,11 @@
                             type: 'ow-if',
                             name: 'OW条件',
                             ico: 'el-icon-more',
+                          },{
+                            id: '15',
+                            type: 'subProject',
+                            name: '子项目',
+                            ico: 'el-icon-s-grid',
                           }
                         ]
                     }

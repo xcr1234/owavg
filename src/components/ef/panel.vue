@@ -23,6 +23,8 @@
                   </el-upload>
                   <el-divider direction="vertical"></el-divider>
                     <el-button type="text" icon="el-icon-download" size="large" @click="downloadData"></el-button>
+                  <el-button type="text" v-if="parentData" @click="returnProject">返回当前项目</el-button>
+                  <el-button type="text" v-else @click="$refs.sub.open()">子项目管理</el-button>
 <!--                    <el-divider direction="vertical"></el-divider>
                     <el-button type="text" icon="el-icon-plus" size="large" @click="zoomAdd"></el-button>
                     <el-divider direction="vertical"></el-divider>
@@ -63,7 +65,7 @@
             </div>
             <!-- 右侧表单 -->
             <div style="width: 300px;border-left: 1px solid #dce3e8;background-color: #FBFBFB">
-                <flow-node-form ref="nodeForm" @setLineLabel="setLineLabel"
+                <flow-node-form ref="nodeForm" :sub="!parentData" @setLineLabel="setLineLabel" @openSub="$refs.sub.open()"
                                 @heroChange="heroChange"
                                 @deleteNode="deleteNode" @deleteLine="onDeleteLine"
                                 @repaintEverything="repaintEverything"></flow-node-form>
@@ -122,6 +124,7 @@
           <el-button @click="codeModal = false" type="primary">关闭</el-button>
         </div>
       </el-dialog>
+      <sub-project ref="sub" @editSub="editSub" :data="data.childProjects"/>
     </div>
 
 </template>
@@ -149,6 +152,7 @@
     import { saveAs } from 'file-saver';
     import gencode from "@/mod/gencode";
     import modcode from "@/mod/modcode";
+    import SubProject from "@/components/ef/subProject";
 
 
 
@@ -185,12 +189,14 @@
                     sourceId: undefined,
                     targetId: undefined
                 },
-                zoom: 0.5
+                zoom: 0.5,
+                parentData: null
             }
         },
         // 一些基础配置移动该文件中
         mixins: [easyFlowMixin],
         components: {
+          SubProject,
             draggable, flowNode, nodeMenu, FlowInfo, FlowNodeForm, FlowHelp
         },
         directives: {
@@ -553,20 +559,24 @@
             },
             // 加载流程图
             dataReload(data) {
+              return new Promise((resolve => {
                 this.easyFlowVisible = false
                 this.data.nodeList = []
                 this.data.lineList = []
                 this.$nextTick(() => {
-                    data = lodash.cloneDeep(data)
-                    this.easyFlowVisible = true
-                    this.data = data
+                  data = lodash.cloneDeep(data)
+                  this.easyFlowVisible = true
+                  this.data = data
+                  this.$nextTick(() => {
+                    this.jsPlumb = jsPlumb.getInstance()
                     this.$nextTick(() => {
-                        this.jsPlumb = jsPlumb.getInstance()
-                        this.$nextTick(() => {
-                            this.jsPlumbInit()
-                        })
+                      this.jsPlumbInit()
+                      resolve()
                     })
+                  })
                 })
+              }))
+
             },
             // 模拟载入数据dataA
             dataReloadA() {
@@ -620,17 +630,33 @@
                     closeOnClickModal: false
                 }).then(() => {
                   this.$message.success("正在下载中,请稍后...")
+                  let data = this.data
+                  if(this.parentData){
+                    this.ensureParent()
+                    data = lodash.cloneDeep(this.parentData.data)
+                  }
+                  let cache = []
                   const blob = new Blob([
                     JSON.stringify({
-                      data: this.data,
+                      data:  data,
                       version: this.$config.dataFileVersion,
                       project: 'designer',
                       projectName: this.projectName
                     },
-                      // null, '\t'
+                      function(key, value) {
+                        if (typeof value === 'object' && value !== null) {
+                          if (cache.indexOf(value) !== -1) {
+                            // 移除
+                            return;
+                          }
+                          // 收集所有的值
+                          cache.push(value);
+                        }
+                        return value;
+                      }
                     )
                   ], {type: "text/plain;charset=utf-8"});
-
+                  cache = null;
                   saveAs(blob, this.projectName +  ".json");
 
                 }).catch(() => {
@@ -679,6 +705,9 @@
               if(data.version < 103){
                 data.data.externHeroes = []
               }
+              if(data.version < 104){
+                data.data.childProjects = []
+              }
 
               this.dataReload(data.data)
               this.projectName = data.projectName
@@ -721,8 +750,13 @@
               }
           },
           exportCode(){
+              let data = this.data
+              if(this.parentData){
+                this.ensureParent()
+                data = lodash.cloneDeep(this.parentData.data)
+              }
               try{
-                const result =   gencode(this.data)
+                const result =   gencode(data)
                 this.code = result.code
                 this.triggerCode = result.trigger
               }catch (e){
@@ -756,6 +790,24 @@
             </ul>`, '提示', {
               dangerouslyUseHTMLString: true
             });
+          },
+          editSub(obj){
+              const {data,index} = obj;
+              this.parentData = {
+                data: lodash.cloneDeep(this.data),
+                index: index
+              }
+              this.dataReload(data)
+          },
+          returnProject(){
+              this.ensureParent()
+              this.dataReload(this.parentData.data)
+              this.parentData = null
+          },
+          ensureParent(){
+              if(this.parentData){
+                this.parentData.data.childProjects[this.parentData.index].data = lodash.cloneDeep(this.data)
+              }
           }
         },
     }

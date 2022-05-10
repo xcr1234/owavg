@@ -6,7 +6,7 @@ export default {
   /**
    * 保存数据文件的版本号
    */
-  dataFileVersion: 103,
+  dataFileVersion: 104,
   /**
    * 默认项目名称
    */

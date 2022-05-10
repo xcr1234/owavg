@@ -36,7 +36,8 @@ export const getData =  () => {
         to: idB
       }
     ],
-    externHeroes: []
+    externHeroes: [],
+    childProjects: []
   }
 }
 

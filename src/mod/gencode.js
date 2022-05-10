@@ -203,9 +203,43 @@ const getChooseArray = (node) => {
   return result
 }
 
-const getNodeCode = (node,ctx) => {
-  if(node.type === 'message'){
+const subProjectNode = (node,ctx,idPool) => {
+  const key = node.message
+  const project = ctx.childProjects.filter(project => project.key === key)[0]
+  if(!project){
+    throw new Error(`无法找到key为${key}的子项目`)
+  }
+  try{
+    const result = gen(project.data,idPool)
+    const {code,triggerId} = result
+    ctx.append(code)
+    ctx.append(`规则("${node.name}")
+{
+\t事件
+\t{
+\t\t持续 - 每名玩家;
+\t\t双方;
+\t\t全部;
+\t}
 
+\t条件
+\t{
+\t\t事件玩家.route == 自定义字符串("${node.id}");
+\t}
+
+\t动作
+\t{
+\t\t事件玩家.route = 自定义字符串("${triggerId}");
+\t}
+}`)
+  } catch (e){
+    console.error(e)
+    throw new Error(`[${node.name}]生成子项目[${project.projectName}]代码失败：` + e.message)
+  }
+}
+
+const getNodeCode = (node,ctx,idPool) => {
+  if(node.type === 'message'){
     const lines = getToLines(ctx.lineList,node.id)
     if(lines.length > 1){
       throw new Error(`[${node.name}]后面只能连接一个节点`)
@@ -215,6 +249,17 @@ const getNodeCode = (node,ctx) => {
       getNodeCode(toNode,ctx)
     }else{
       ctx.append(messageNode(node,''))
+    }
+  }else if(node.type === 'subProject'){
+    const lines = getToLines(ctx.lineList,node.id)
+    if(lines.length > 1){
+      throw new Error(`[${node.name}]后面只能连接一个节点`)
+    }else if(lines.length === 1){
+      const toNode = ctx.nodeMap[lines[0].to]
+      subProjectNode(node,ctx,idPool)
+      getNodeCode(toNode,ctx)
+    }else{
+      subProjectNode(node,ctx,idPool)
     }
   }else if(node.type === 'choose'){
     const lines = getToLines(ctx.lineList,node.id)
@@ -309,8 +354,12 @@ const triggerCode = (node) => {
 `
 }
 
-export const poolId = (data) => {
-  const pool = {}
+
+export const poolId = (data,iPool) => {
+  let pool = {}
+  if(typeof iPool === 'object'){
+    pool = iPool
+  }
   data.nodeList.forEach(node => {
     let pos = 6
     let id = ''
@@ -326,11 +375,12 @@ export const poolId = (data) => {
     line.from = pool[line.from]
     line.to = pool[line.to]
   })
+  return pool
 }
 
-export default   (i) => {
+const gen =  (i,pool) => {
   const data = lodash.cloneDeep(i)
-  poolId(data)
+  const idPool = poolId(data,pool)
 
   const nodeMap = {}
   data.nodeList.forEach(node => {
@@ -350,15 +400,20 @@ export default   (i) => {
     nodeMap,
     nodeList:data.nodeList,
     lineList:data.lineList,
+    childProjects: data.childProjects,
     buf: '',
+    idPool,
     append(str){
       this.buf += str
     }
   }
   const node = nodeMap[lines[0].to]
-  getNodeCode(node,ctx)
+  getNodeCode(node,ctx,idPool)
   return {
     code: ctx.buf,
-    trigger: triggerCode(node)
+    trigger: triggerCode(node),
+    triggerId: node.id
   }
 }
+
+export default gen

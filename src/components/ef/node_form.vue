@@ -15,13 +15,19 @@
                     <el-form-item label="名称">
                         <el-input v-model="node.name"></el-input>
                     </el-form-item>
-                  <el-form-item label="压缩字符串">
-                    <el-switch
-                      v-model="node.disableCompress" :active-value="false" :inactive-value="true"
-                      active-color="#13ce66"
-                      inactive-color="#ff4949" ></el-switch>
+                  <el-form-item label="子项目">
+                    <el-select v-model="node.message">
+                      <el-option v-for="(item) in data.childProjects" :key="item.key" :value="item.key" :label="item.projectName"></el-option>
+                    </el-select>
+                    <el-button v-if="sub" type="text" @click="$emit('openSub')">管理子项目</el-button>
                   </el-form-item>
                   <template v-if="node.type === 'message' || node.type === 'choose'">
+                    <el-form-item label="压缩字符串">
+                      <el-switch
+                        v-model="node.disableCompress" :active-value="false" :inactive-value="true"
+                        active-color="#13ce66"
+                        inactive-color="#ff4949" ></el-switch>
+                    </el-form-item>
                     <el-form-item label="对话英雄">
                       <el-select v-model="node.hero"    filterable @change="heroChange"
                                  allow-create
@@ -133,6 +139,9 @@
     import { cloneDeep } from 'lodash'
 
     export default {
+        props:{
+          sub: Boolean
+        },
         data() {
             return {
                 visible: true,
